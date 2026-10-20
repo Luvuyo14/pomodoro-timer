@@ -1,7 +1,8 @@
 package com.luvuyo.pomodoro
 
+import android.app.Application
 import android.os.SystemClock
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -11,21 +12,28 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class PomodoroViewModel : ViewModel() {
+class PomodoroViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Iteration 3 will replace this with values loaded from settings.
-    private val config = PomodoroConfig()
+    private val repository = SettingsRepository(application)
 
-    private val _uiState = MutableStateFlow(
-        TimerUiState(
-            totalMillis = config.workMillis,
-            remainingMillis = config.workMillis,
-            sessionsBeforeLongBreak = config.sessionsBeforeLongBreak
-        )
-    )
+    private val _config = MutableStateFlow(PomodoroConfig())
+    /** The current saved configuration, used by the settings screen. */
+    val config: StateFlow<PomodoroConfig> = _config.asStateFlow()
+
+    private val _uiState = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _uiState.asStateFlow()
 
     private var tickJob: Job? = null
+
+    init {
+        // Keep the timer in sync with whatever is saved in DataStore.
+        viewModelScope.launch {
+            repository.config.collect { saved ->
+                _config.value = saved
+                applyConfig(saved)
+            }
+        }
+    }
 
     /** Starts a fresh session or resumes a paused one. */
     fun start() {
@@ -76,8 +84,33 @@ class PomodoroViewModel : ViewModel() {
         _uiState.update { it.toSession(SessionType.WORK, 0) }
     }
 
+    /** Persists new settings. The collector in init applies them to the timer. */
+    fun saveSettings(newConfig: PomodoroConfig) {
+        viewModelScope.launch { repository.save(newConfig) }
+    }
+
+    /**
+     * Applies a new config. A session that hasn't started yet picks up the new length
+     * immediately; a running or paused session keeps its length until it ends.
+     */
+    private fun applyConfig(newConfig: PomodoroConfig) {
+        _uiState.update { current ->
+            val untouched = current.status == TimerStatus.IDLE &&
+                    current.remainingMillis == current.totalMillis
+            val updated = current.copy(sessionsBeforeLongBreak = newConfig.sessionsBeforeLongBreak)
+
+            if (untouched) {
+                val duration = newConfig.durationFor(current.sessionType)
+                updated.copy(totalMillis = duration, remainingMillis = duration)
+            } else {
+                updated
+            }
+        }
+    }
+
     /** Called when the countdown reaches zero: count the session and move to the next one. */
     private fun completeSession() {
+        val config = _config.value
         _uiState.update { current ->
             val completed =
                 if (current.sessionType == SessionType.WORK) current.completedWorkSessions + 1
@@ -95,7 +128,7 @@ class PomodoroViewModel : ViewModel() {
 
     /** Builds an idle state for [next] with a full countdown. */
     private fun TimerUiState.toSession(next: SessionType, completed: Int): TimerUiState {
-        val duration = config.durationFor(next)
+        val duration = _config.value.durationFor(next)
         return copy(
             sessionType = next,
             status = TimerStatus.IDLE,

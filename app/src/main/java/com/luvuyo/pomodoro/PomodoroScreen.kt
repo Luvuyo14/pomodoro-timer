@@ -18,8 +18,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,21 +27,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-
-@Composable
-fun PomodoroScreen(viewModel: PomodoroViewModel = viewModel()) {
-    val state by viewModel.uiState.collectAsState()
-
-    PomodoroContent(
-        state = state,
-        onStart = viewModel::start,
-        onPause = viewModel::pause,
-        onReset = viewModel::reset,
-        onSkipBreak = viewModel::skipBreak,
-        onResetAll = viewModel::resetAll
-    )
-}
 
 @Composable
 fun PomodoroContent(
@@ -52,7 +35,8 @@ fun PomodoroContent(
     onPause: () -> Unit,
     onReset: () -> Unit,
     onSkipBreak: () -> Unit,
-    onResetAll: () -> Unit
+    onResetAll: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
     val sessionColor = when (state.sessionType) {
         SessionType.WORK -> MaterialTheme.colorScheme.primary
@@ -60,80 +44,89 @@ fun PomodoroContent(
         SessionType.LONG_BREAK -> MaterialTheme.colorScheme.secondary
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = state.sessionType.label,
-            style = MaterialTheme.typography.headlineMedium,
-            color = sessionColor
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        TextButton(
+            onClick = onOpenSettings,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+        ) { Text("Settings") }
 
-        Spacer(Modifier.height(24.dp))
-
-        Box(contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(
-                progress = { state.progress },
-                modifier = Modifier.size(260.dp),
-                color = sessionColor,
-                strokeWidth = 12.dp
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
-                text = formatTime(state.remainingMillis),
-                fontSize = 56.sp,
-                modifier = Modifier.semantics {
-                    contentDescription = "Time remaining ${formatTime(state.remainingMillis)}"
-                }
+                text = state.sessionType.label,
+                style = MaterialTheme.typography.headlineMedium,
+                color = sessionColor
             )
-        }
 
-        Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-        CycleDots(
-            filled = state.cycleProgress,
-            total = state.sessionsBeforeLongBreak,
-            color = sessionColor
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            text = "Work sessions completed: ${state.completedWorkSessions}",
-            style = MaterialTheme.typography.bodyLarge
-        )
-
-        Spacer(Modifier.height(24.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            when (state.status) {
-                TimerStatus.RUNNING -> Button(onClick = onPause) { Text("Pause") }
-                TimerStatus.PAUSED -> Button(onClick = onStart) { Text("Resume") }
-                TimerStatus.IDLE -> Button(onClick = onStart) { Text("Start") }
+            Box(contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    progress = { state.progress },
+                    modifier = Modifier.size(260.dp),
+                    color = sessionColor,
+                    strokeWidth = 12.dp
+                )
+                Text(
+                    text = formatTime(state.remainingMillis),
+                    fontSize = 56.sp,
+                    modifier = Modifier.semantics {
+                        contentDescription = "Time remaining ${formatTime(state.remainingMillis)}"
+                    }
+                )
             }
-            OutlinedButton(
-                onClick = onReset,
-                enabled = state.status != TimerStatus.IDLE ||
-                        state.remainingMillis != state.totalMillis
-            ) { Text("Reset") }
-        }
 
-        Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(24.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (state.sessionType != SessionType.WORK) {
-                TextButton(onClick = onSkipBreak) { Text("Skip break") }
+            CycleDots(
+                filled = state.cycleProgress,
+                total = state.sessionsBeforeLongBreak,
+                color = sessionColor
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = "Work sessions completed: ${state.completedWorkSessions}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                when (state.status) {
+                    TimerStatus.RUNNING -> Button(onClick = onPause) { Text("Pause") }
+                    TimerStatus.PAUSED -> Button(onClick = onStart) { Text("Resume") }
+                    TimerStatus.IDLE -> Button(onClick = onStart) { Text("Start") }
+                }
+                OutlinedButton(
+                    onClick = onReset,
+                    enabled = state.status != TimerStatus.IDLE ||
+                            state.remainingMillis != state.totalMillis
+                ) { Text("Reset") }
             }
-            TextButton(
-                onClick = onResetAll,
-                enabled = state.completedWorkSessions > 0 ||
-                        state.sessionType != SessionType.WORK ||
-                        state.status != TimerStatus.IDLE ||
-                        state.remainingMillis != state.totalMillis
-            ) { Text("Reset all") }
+
+            Spacer(Modifier.height(8.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (state.sessionType != SessionType.WORK) {
+                    TextButton(onClick = onSkipBreak) { Text("Skip break") }
+                }
+                TextButton(
+                    onClick = onResetAll,
+                    enabled = state.completedWorkSessions > 0 ||
+                            state.sessionType != SessionType.WORK ||
+                            state.status != TimerStatus.IDLE ||
+                            state.remainingMillis != state.totalMillis
+                ) { Text("Reset all") }
+            }
         }
     }
 }

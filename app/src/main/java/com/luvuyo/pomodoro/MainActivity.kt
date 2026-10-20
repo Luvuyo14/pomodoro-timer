@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.safeDrawingPadding()) {
-                    Box { PomodoroScreen() }
+                    Box { PomodoroApp() }
                 }
             }
         }

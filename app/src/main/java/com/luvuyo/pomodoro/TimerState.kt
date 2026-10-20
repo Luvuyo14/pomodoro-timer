@@ -8,27 +8,42 @@ enum class SessionType(val label: String) {
 
 enum class TimerStatus { IDLE, RUNNING, PAUSED }
 
-/** Interval configuration. Iteration 3 will load this from settings. */
+/** Interval configuration, stored in minutes. Defaults follow the classic Pomodoro Technique. */
 data class PomodoroConfig(
-    val workMillis: Long = 25 * 60 * 1000L,
-    val shortBreakMillis: Long = 5 * 60 * 1000L,
-    val longBreakMillis: Long = 15 * 60 * 1000L,
+    val workMinutes: Int = 25,
+    val shortBreakMinutes: Int = 5,
+    val longBreakMinutes: Int = 15,
     val sessionsBeforeLongBreak: Int = 4
 ) {
     fun durationFor(type: SessionType): Long = when (type) {
-        SessionType.WORK -> workMillis
-        SessionType.SHORT_BREAK -> shortBreakMillis
-        SessionType.LONG_BREAK -> longBreakMillis
+        SessionType.WORK -> workMinutes
+        SessionType.SHORT_BREAK -> shortBreakMinutes
+        SessionType.LONG_BREAK -> longBreakMinutes
+    } * 60_000L
+
+    /** Returns a copy with every value forced into its allowed range. */
+    fun sanitized(): PomodoroConfig = copy(
+        workMinutes = workMinutes.coerceIn(WORK_RANGE),
+        shortBreakMinutes = shortBreakMinutes.coerceIn(SHORT_BREAK_RANGE),
+        longBreakMinutes = longBreakMinutes.coerceIn(LONG_BREAK_RANGE),
+        sessionsBeforeLongBreak = sessionsBeforeLongBreak.coerceIn(SESSIONS_RANGE)
+    )
+
+    companion object {
+        val WORK_RANGE = 1..120
+        val SHORT_BREAK_RANGE = 1..60
+        val LONG_BREAK_RANGE = 1..60
+        val SESSIONS_RANGE = 2..8
     }
 }
 
 data class TimerUiState(
     val sessionType: SessionType = SessionType.WORK,
     val status: TimerStatus = TimerStatus.IDLE,
-    val totalMillis: Long = PomodoroConfig().workMillis,
-    val remainingMillis: Long = PomodoroConfig().workMillis,
+    val totalMillis: Long = PomodoroConfig().durationFor(SessionType.WORK),
+    val remainingMillis: Long = PomodoroConfig().durationFor(SessionType.WORK),
     val completedWorkSessions: Int = 0,
-    val sessionsBeforeLongBreak: Int = 4
+    val sessionsBeforeLongBreak: Int = PomodoroConfig().sessionsBeforeLongBreak
 ) {
     /** 0f..1f, how much of the session has elapsed. */
     val progress: Float
