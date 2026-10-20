@@ -12,6 +12,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * Owns the clock, storage and sound. The rules for what happens when a session ends live in
+ * TimerState.kt as pure functions, so they can be unit tested.
+ */
 class PomodoroViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = SettingsRepository(application)
@@ -31,7 +35,7 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             repository.config.collect { saved ->
                 _config.value = saved
-                applyConfig(saved)
+                _uiState.update { it.withConfigApplied(saved) }
             }
         }
     }
@@ -76,13 +80,13 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
     fun skipBreak() {
         if (_uiState.value.sessionType == SessionType.WORK) return
         tickJob?.cancel()
-        _uiState.update { it.toSession(SessionType.WORK, it.completedWorkSessions) }
+        _uiState.update { it.afterSkippingBreak(_config.value) }
     }
 
     /** Starts over: back to a fresh Work session with the counter at zero. */
     fun resetAll() {
         tickJob?.cancel()
-        _uiState.update { it.toSession(SessionType.WORK, 0) }
+        _uiState.update { it.afterResetAll(_config.value) }
     }
 
     /** Persists new settings. The collector in init applies them to the timer. */
@@ -95,55 +99,11 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
         soundPlayer.playSessionEnd()
     }
 
-    /**
-     * Applies a new config. A session that hasn't started yet picks up the new length
-     * immediately; a running or paused session keeps its length until it ends.
-     */
-    private fun applyConfig(newConfig: PomodoroConfig) {
-        _uiState.update { current ->
-            val untouched = current.status == TimerStatus.IDLE &&
-                    current.remainingMillis == current.totalMillis
-            val updated = current.copy(sessionsBeforeLongBreak = newConfig.sessionsBeforeLongBreak)
-
-            if (untouched) {
-                val duration = newConfig.durationFor(current.sessionType)
-                updated.copy(totalMillis = duration, remainingMillis = duration)
-            } else {
-                updated
-            }
-        }
-    }
-
-    /** Called when the countdown reaches zero: count the session, play the sound, move on. */
+    /** Called when the countdown reaches zero: move to the next session and play the sound. */
     private fun completeSession() {
         val config = _config.value
-        _uiState.update { current ->
-            val completed =
-                if (current.sessionType == SessionType.WORK) current.completedWorkSessions + 1
-                else current.completedWorkSessions
-
-            val next = when (current.sessionType) {
-                SessionType.WORK ->
-                    if (completed % config.sessionsBeforeLongBreak == 0) SessionType.LONG_BREAK
-                    else SessionType.SHORT_BREAK
-                SessionType.SHORT_BREAK, SessionType.LONG_BREAK -> SessionType.WORK
-            }
-            current.toSession(next, completed)
-        }
-
+        _uiState.update { it.afterSessionEnds(config) }
         if (config.soundEnabled) soundPlayer.playSessionEnd()
-    }
-
-    /** Builds an idle state for [next] with a full countdown. */
-    private fun TimerUiState.toSession(next: SessionType, completed: Int): TimerUiState {
-        val duration = _config.value.durationFor(next)
-        return copy(
-            sessionType = next,
-            status = TimerStatus.IDLE,
-            totalMillis = duration,
-            remainingMillis = duration,
-            completedWorkSessions = completed
-        )
     }
 
     override fun onCleared() {

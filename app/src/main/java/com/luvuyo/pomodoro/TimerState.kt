@@ -57,5 +57,68 @@ data class TimerUiState(
      */
     val cycleProgress: Int
         get() = if (sessionType == SessionType.LONG_BREAK) sessionsBeforeLongBreak
-        else completedWorkSessions % sessionsBeforeLongBreak
+        else completedWorkSessions % sessionsBeforeLongBreak.coerceAtLeast(1)
+}
+
+// ---------------------------------------------------------------------------------------------
+// Cycle rules. Pure functions (no Android, no clock) so they can be unit tested on the JVM.
+// ---------------------------------------------------------------------------------------------
+
+/** An idle session of [type] with a full countdown and the given work session count. */
+fun TimerUiState.toIdleSession(
+    type: SessionType,
+    completedWorkSessions: Int,
+    config: PomodoroConfig
+): TimerUiState {
+    val duration = config.durationFor(type)
+    return copy(
+        sessionType = type,
+        status = TimerStatus.IDLE,
+        totalMillis = duration,
+        remainingMillis = duration,
+        completedWorkSessions = completedWorkSessions,
+        sessionsBeforeLongBreak = config.sessionsBeforeLongBreak
+    )
+}
+
+/**
+ * The state right after the countdown reaches zero: a finished work session is counted, then
+ * Work -> Short Break (or Long Break after every Nth work session), and any break -> Work.
+ */
+fun TimerUiState.afterSessionEnds(config: PomodoroConfig): TimerUiState {
+    val completed =
+        if (sessionType == SessionType.WORK) completedWorkSessions + 1 else completedWorkSessions
+    val cycleLength = config.sessionsBeforeLongBreak.coerceAtLeast(1)
+
+    val next = when (sessionType) {
+        SessionType.WORK ->
+            if (completed % cycleLength == 0) SessionType.LONG_BREAK else SessionType.SHORT_BREAK
+        SessionType.SHORT_BREAK, SessionType.LONG_BREAK -> SessionType.WORK
+    }
+    return toIdleSession(next, completed, config)
+}
+
+/** Skipping a break goes straight to Work without counting anything. Skipping Work does nothing. */
+fun TimerUiState.afterSkippingBreak(config: PomodoroConfig): TimerUiState =
+    if (sessionType == SessionType.WORK) this
+    else toIdleSession(SessionType.WORK, completedWorkSessions, config)
+
+/** Back to a fresh Work session with the counter at zero. */
+fun TimerUiState.afterResetAll(config: PomodoroConfig): TimerUiState =
+    toIdleSession(SessionType.WORK, 0, config)
+
+/**
+ * Applies a changed config. A session that hasn't started yet picks up the new length
+ * immediately; a running or paused session keeps its length until it ends.
+ */
+fun TimerUiState.withConfigApplied(config: PomodoroConfig): TimerUiState {
+    val untouched = status == TimerStatus.IDLE && remainingMillis == totalMillis
+    val updated = copy(sessionsBeforeLongBreak = config.sessionsBeforeLongBreak)
+
+    return if (untouched) {
+        val duration = config.durationFor(sessionType)
+        updated.copy(totalMillis = duration, remainingMillis = duration)
+    } else {
+        updated
+    }
 }
