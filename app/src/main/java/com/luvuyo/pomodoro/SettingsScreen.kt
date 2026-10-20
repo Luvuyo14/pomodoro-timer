@@ -1,6 +1,7 @@
 package com.luvuyo.pomodoro
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
@@ -47,104 +49,111 @@ fun SettingsScreen(
     var sessions by rememberSaveable(config) { mutableStateOf(config.sessionsBeforeLongBreak) }
     var sound by rememberSaveable(config) { mutableStateOf(config.soundEnabled) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+    // Centre a readable-width column on tablets and in landscape.
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Text(
-            text = "Settings",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.semantics { heading() }
-        )
-
-        SettingStepper(
-            label = "Work session",
-            valueText = "$work min",
-            value = work,
-            range = PomodoroConfig.WORK_RANGE,
-            onChange = { work = it }
-        )
-        SettingStepper(
-            label = "Short break",
-            valueText = "$shortBreak min",
-            value = shortBreak,
-            range = PomodoroConfig.SHORT_BREAK_RANGE,
-            onChange = { shortBreak = it }
-        )
-        SettingStepper(
-            label = "Long break",
-            valueText = "$longBreak min",
-            value = longBreak,
-            range = PomodoroConfig.LONG_BREAK_RANGE,
-            onChange = { longBreak = it }
-        )
-        SettingStepper(
-            label = "Work sessions before long break",
-            valueText = "$sessions sessions",
-            value = sessions,
-            range = PomodoroConfig.SESSIONS_RANGE,
-            onChange = { sessions = it }
-        )
-
-        // The whole row is one toggle target, which is easier to hit and reads well in TalkBack.
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .toggleable(
-                    value = sound,
-                    role = Role.Switch,
-                    onValueChange = { sound = it }
-                ),
-            verticalAlignment = Alignment.CenterVertically
+                .widthIn(max = 560.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Sound on session end", style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    text = if (sound) "On" else "Off",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            Switch(checked = sound, onCheckedChange = null)
-        }
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.semantics { heading() }
+            )
 
-        OutlinedButton(onClick = onPreviewSound) { Text("Preview sound") }
+            SettingStepper(
+                label = "Work session",
+                valueText = "$work min",
+                value = work,
+                range = PomodoroConfig.WORK_RANGE,
+                onChange = { work = it }
+            )
+            SettingStepper(
+                label = "Short break",
+                valueText = "$shortBreak min",
+                value = shortBreak,
+                range = PomodoroConfig.SHORT_BREAK_RANGE,
+                onChange = { shortBreak = it }
+            )
+            SettingStepper(
+                label = "Long break",
+                valueText = "$longBreak min",
+                value = longBreak,
+                range = PomodoroConfig.LONG_BREAK_RANGE,
+                onChange = { longBreak = it }
+            )
+            SettingStepper(
+                label = "Work sessions before long break",
+                valueText = "$sessions sessions",
+                value = sessions,
+                range = PomodoroConfig.SESSIONS_RANGE,
+                onChange = { sessions = it }
+            )
 
-        Text(
-            text = "A session that hasn't started picks up changes right away. " +
-                    "A running or paused session finishes at its current length. " +
-                    "The sound follows your notification volume.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = {
-                onSave(
-                    PomodoroConfig(
-                        workMinutes = work,
-                        shortBreakMinutes = shortBreak,
-                        longBreakMinutes = longBreak,
-                        sessionsBeforeLongBreak = sessions,
-                        soundEnabled = sound
+            // The whole row is one toggle target, which is easier to hit and reads well in TalkBack.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .toggleable(
+                        value = sound,
+                        role = Role.Switch,
+                        onValueChange = { sound = it }
+                    ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Sound on session end", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = if (sound) "On" else "Off",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                )
-            }) { Text("Save") }
+                }
+                Switch(checked = sound, onCheckedChange = null)
+            }
 
-            OutlinedButton(onClick = onCancel) { Text("Cancel") }
+            OutlinedButton(onClick = onPreviewSound) { Text("Preview sound") }
+
+            Text(
+                text = "A session that hasn't started picks up changes right away. " +
+                        "A running or paused session finishes at its current length. " +
+                        "The sound follows your notification volume.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Button(onClick = {
+                    onSave(
+                        PomodoroConfig(
+                            workMinutes = work,
+                            shortBreakMinutes = shortBreak,
+                            longBreakMinutes = longBreak,
+                            sessionsBeforeLongBreak = sessions,
+                            soundEnabled = sound
+                        )
+                    )
+                }) { Text("Save") }
+
+                OutlinedButton(onClick = onCancel) { Text("Cancel") }
+            }
+
+            TextButton(onClick = {
+                val defaults = PomodoroConfig()
+                work = defaults.workMinutes
+                shortBreak = defaults.shortBreakMinutes
+                longBreak = defaults.longBreakMinutes
+                sessions = defaults.sessionsBeforeLongBreak
+                sound = defaults.soundEnabled
+            }) { Text("Restore defaults") }
         }
-
-        TextButton(onClick = {
-            val defaults = PomodoroConfig()
-            work = defaults.workMinutes
-            shortBreak = defaults.shortBreakMinutes
-            longBreak = defaults.longBreakMinutes
-            sessions = defaults.sessionsBeforeLongBreak
-            sound = defaults.soundEnabled
-        }) { Text("Restore defaults") }
     }
 }
 
