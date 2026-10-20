@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/icon.png" alt="Pomodoro Timer app icon" width="128" />
+  <img src="doc/image/PorodoroTimer Icon.png" alt="Pomodoro Timer app icon" width="128" />
 </p>
 
 # Pomodoro Timer
