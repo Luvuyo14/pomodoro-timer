@@ -5,11 +5,8 @@ plugins {
 
 android {
     namespace = "com.luvuyo.pomodoro"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
+
 
     defaultConfig {
         applicationId = "com.luvuyo.pomodoro"
@@ -53,4 +50,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 }
