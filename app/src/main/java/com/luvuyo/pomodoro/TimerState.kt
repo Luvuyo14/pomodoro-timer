@@ -13,7 +13,8 @@ data class PomodoroConfig(
     val workMinutes: Int = 25,
     val shortBreakMinutes: Int = 5,
     val longBreakMinutes: Int = 15,
-    val sessionsBeforeLongBreak: Int = 4
+    val sessionsBeforeLongBreak: Int = 4,
+    val soundEnabled: Boolean = true
 ) {
     fun durationFor(type: SessionType): Long = when (type) {
         SessionType.WORK -> workMinutes

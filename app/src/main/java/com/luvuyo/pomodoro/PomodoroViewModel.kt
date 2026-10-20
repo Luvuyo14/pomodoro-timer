@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 class PomodoroViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = SettingsRepository(application)
+    private val soundPlayer = SoundPlayer(application)
 
     private val _config = MutableStateFlow(PomodoroConfig())
     /** The current saved configuration, used by the settings screen. */
@@ -89,6 +90,11 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch { repository.save(newConfig) }
     }
 
+    /** Plays the end-of-session sound so the user can check the volume. Ignores the sound switch. */
+    fun previewSound() {
+        soundPlayer.playSessionEnd()
+    }
+
     /**
      * Applies a new config. A session that hasn't started yet picks up the new length
      * immediately; a running or paused session keeps its length until it ends.
@@ -108,7 +114,7 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    /** Called when the countdown reaches zero: count the session and move to the next one. */
+    /** Called when the countdown reaches zero: count the session, play the sound, move on. */
     private fun completeSession() {
         val config = _config.value
         _uiState.update { current ->
@@ -124,6 +130,8 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
             }
             current.toSession(next, completed)
         }
+
+        if (config.soundEnabled) soundPlayer.playSessionEnd()
     }
 
     /** Builds an idle state for [next] with a full countdown. */
@@ -140,6 +148,7 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
 
     override fun onCleared() {
         tickJob?.cancel()
+        soundPlayer.stop()
         super.onCleared()
     }
 }

@@ -3,6 +3,7 @@ package com.luvuyo.pomodoro
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -26,6 +27,7 @@ class SettingsRepository(private val context: Context) {
         val SHORT_BREAK_MINUTES = intPreferencesKey("short_break_minutes")
         val LONG_BREAK_MINUTES = intPreferencesKey("long_break_minutes")
         val SESSIONS_BEFORE_LONG_BREAK = intPreferencesKey("sessions_before_long_break")
+        val SOUND_ENABLED = booleanPreferencesKey("sound_enabled")
     }
 
     /** Emits the saved config, falling back to defaults for anything not saved yet. */
@@ -40,7 +42,8 @@ class SettingsRepository(private val context: Context) {
                 shortBreakMinutes = prefs[Keys.SHORT_BREAK_MINUTES] ?: defaults.shortBreakMinutes,
                 longBreakMinutes = prefs[Keys.LONG_BREAK_MINUTES] ?: defaults.longBreakMinutes,
                 sessionsBeforeLongBreak = prefs[Keys.SESSIONS_BEFORE_LONG_BREAK]
-                    ?: defaults.sessionsBeforeLongBreak
+                    ?: defaults.sessionsBeforeLongBreak,
+                soundEnabled = prefs[Keys.SOUND_ENABLED] ?: defaults.soundEnabled
             ).sanitized()
         }
         .distinctUntilChanged()
@@ -52,6 +55,7 @@ class SettingsRepository(private val context: Context) {
             prefs[Keys.SHORT_BREAK_MINUTES] = safe.shortBreakMinutes
             prefs[Keys.LONG_BREAK_MINUTES] = safe.longBreakMinutes
             prefs[Keys.SESSIONS_BEFORE_LONG_BREAK] = safe.sessionsBeforeLongBreak
+            prefs[Keys.SOUND_ENABLED] = safe.soundEnabled
         }
     }
 }

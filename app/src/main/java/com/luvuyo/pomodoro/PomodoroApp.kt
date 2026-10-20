@@ -24,7 +24,8 @@ fun PomodoroApp(viewModel: PomodoroViewModel = viewModel()) {
                 viewModel.saveSettings(newConfig)
                 showSettings = false
             },
-            onCancel = { showSettings = false }
+            onCancel = { showSettings = false },
+            onPreviewSound = viewModel::previewSound
         )
     } else {
         PomodoroContent(
