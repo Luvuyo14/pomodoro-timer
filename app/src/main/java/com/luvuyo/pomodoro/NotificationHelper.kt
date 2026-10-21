@@ -28,19 +28,19 @@ object NotificationHelper {
 
         val timer = NotificationChannel(
             CHANNEL_TIMER,
-            "Running timer",
+            context.getString(R.string.channel_timer_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "Shows the countdown while a session is running"
+            description = context.getString(R.string.channel_timer_description)
             setShowBadge(false)
         }
 
         val sessionEnd = NotificationChannel(
             CHANNEL_SESSION_END,
-            "Session finished",
+            context.getString(R.string.channel_end_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Tells you when a work session or break has finished"
+            description = context.getString(R.string.channel_end_description)
             // The app plays its own sound, so it can respect the in-app sound switch.
             setSound(null, null)
             enableVibration(true)
@@ -55,7 +55,7 @@ object NotificationHelper {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_TIMER)
             .setSmallIcon(R.drawable.ic_stat_timer)
-            .setContentTitle(state.sessionType.label)
+            .setContentTitle(context.getString(state.sessionType.labelRes()))
             .setContentIntent(openAppIntent(context))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -66,19 +66,33 @@ object NotificationHelper {
 
         if (running) {
             builder
-                .setContentText("Time remaining")
+                .setContentText(context.getString(R.string.time_remaining))
                 .setShowWhen(true)
                 .setUsesChronometer(true)
                 .setChronometerCountDown(true)
                 .setWhen(System.currentTimeMillis() + state.remainingMillis)
-                .addAction(0, "Pause", serviceIntent(context, TimerService.ACTION_PAUSE))
+                .addAction(
+                    0,
+                    context.getString(R.string.action_pause),
+                    serviceIntent(context, TimerService.ACTION_PAUSE)
+                )
         } else {
             builder
-                .setContentText("Paused at ${formatTime(state.remainingMillis)}")
+                .setContentText(
+                    context.getString(R.string.paused_at, formatTime(state.remainingMillis))
+                )
                 .setShowWhen(false)
-                .addAction(0, "Resume", serviceIntent(context, TimerService.ACTION_RESUME))
+                .addAction(
+                    0,
+                    context.getString(R.string.action_resume),
+                    serviceIntent(context, TimerService.ACTION_RESUME)
+                )
         }
-        builder.addAction(0, "Stop", serviceIntent(context, TimerService.ACTION_STOP))
+        builder.addAction(
+            0,
+            context.getString(R.string.action_stop),
+            serviceIntent(context, TimerService.ACTION_STOP)
+        )
 
         return builder.build()
     }
@@ -92,20 +106,20 @@ object NotificationHelper {
         ) return
 
         val title = when (finished) {
-            SessionType.WORK -> "Work session complete"
-            SessionType.SHORT_BREAK -> "Break is over"
-            SessionType.LONG_BREAK -> "Long break is over"
+            SessionType.WORK -> R.string.notification_work_done
+            SessionType.SHORT_BREAK -> R.string.notification_break_done
+            SessionType.LONG_BREAK -> R.string.notification_long_break_done
         }
         val text = when (next) {
-            SessionType.SHORT_BREAK -> "Time for a short break."
-            SessionType.LONG_BREAK -> "Great work! Time for a long break."
-            SessionType.WORK -> "Ready for the next work session?"
+            SessionType.SHORT_BREAK -> R.string.notification_next_short_break
+            SessionType.LONG_BREAK -> R.string.notification_next_long_break
+            SessionType.WORK -> R.string.notification_next_work
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_SESSION_END)
             .setSmallIcon(R.drawable.ic_stat_timer)
-            .setContentTitle(title)
-            .setContentText(text)
+            .setContentTitle(context.getString(title))
+            .setContentText(context.getString(text))
             .setContentIntent(openAppIntent(context))
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_ALARM)

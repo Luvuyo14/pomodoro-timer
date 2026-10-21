@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">Pomodoro Timer</string>
+
+    <!-- Session types -->
+    <string name="session_work">Ukusebenza</string>
+    <string name="session_short_break">Ikhefu Elifutshane</string>
+    <string name="session_long_break">Ikhefu Elide</string>
+
+    <!-- Timer screen -->
+    <string name="settings">Useto</string>
+    <string name="action_start">Qala</string>
+    <string name="action_pause">Misa okwethutyana</string>
+    <string name="action_resume">Qhubeka</string>
+    <string name="action_reset">Seta kwakhona</string>
+    <string name="action_stop">Yeka</string>
+    <string name="action_skip_break">Tsiba ikhefu</string>
+    <string name="action_reset_all">Seta yonke into kwakhona</string>
+    <string name="work_sessions_completed">Amaxesha okusebenza agqityiweyo: %1$d</string>
+    <string name="timer_ring_description">%1$s, kusele %2$s</string>
+    <string name="cycle_dots_description">Amaxesha okusebenza agqityiweyo kujikelo: %1$d/%2$d</string>
+    <string name="time_remaining">Ixesha eliseleyo</string>
+    <string name="paused_at">Kumiswe ku-%1$s</string>
+
+    <!-- Settings screen -->
+    <string name="setting_work_session">Ixesha lokusebenza</string>
+    <string name="setting_short_break">Ikhefu elifutshane</string>
+    <string name="setting_long_break">Ikhefu elide</string>
+    <string name="setting_sessions_before_long_break">Amaxesha okusebenza phambi kwekhefu elide</string>
+    <string name="setting_sound">Isandi xa ixesha liphela</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="sessions_count">%1$d amaxesha</string>
+    <string name="state_on">Kuvuliwe</string>
+    <string name="state_off">Kuvaliwe</string>
+    <string name="action_preview_sound">Mamela isandi</string>
+    <string name="action_save">Gcina</string>
+    <string name="action_cancel">Rhoxisa</string>
+    <string name="action_restore_defaults">Buyisela okuzenzekelayo</string>
+    <string name="decrease_setting">Nciphisa: %1$s</string>
+    <string name="increase_setting">Yandisa: %1$s</string>
+    <string name="settings_hint">Ixesha elingekaqali lithatha utshintsho kwangoko. Ixesha eliqhubekayo okanye elimisiweyo liphela ngobude balo ngoku. Isandi silandela ivolumu yezaziso.</string>
+
+    <!-- Notifications -->
+    <string name="channel_timer_name">Ixesha eliqhubekayo</string>
+    <string name="channel_timer_description">Ibonisa ukubala ngasemva ngoxa ixesha liqhubeka</string>
+    <string name="channel_end_name">Ixesha liphelile</string>
+    <string name="channel_end_description">Ikwazisa xa ixesha lokusebenza okanye ikhefu liphelile</string>
+    <string name="notification_work_done">Ixesha lokusebenza liphelile</string>
+    <string name="notification_break_done">Ikhefu liphelile</string>
+    <string name="notification_long_break_done">Ikhefu elide liphelile</string>
+    <string name="notification_next_short_break">Lixesha lekhefu elifutshane.</string>
+    <string name="notification_next_long_break">Umsebenzi omhle! Lixesha lekhefu elide.</string>
+    <string name="notification_next_work">Ukulungele ixesha elilandelayo lokusebenza?</string>
+</resources>

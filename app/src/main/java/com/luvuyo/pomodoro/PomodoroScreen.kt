@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -65,7 +66,7 @@ fun PomodoroContent(
                 .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            TextButton(onClick = onOpenSettings) { Text("Settings") }
+            TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings)) }
         }
 
         BoxWithConstraints(
@@ -156,7 +157,7 @@ private fun sessionColor(type: SessionType): Color = when (type) {
 @Composable
 private fun SessionLabel(type: SessionType, color: Color) {
     Text(
-        text = type.label,
+        text = stringResource(type.labelRes()),
         style = MaterialTheme.typography.headlineMedium,
         color = color,
         modifier = Modifier.semantics {
@@ -170,6 +171,11 @@ private fun SessionLabel(type: SessionType, color: Color) {
 @Composable
 private fun TimerRing(state: TimerUiState, color: Color, size: Dp) {
     val time = formatTime(state.remainingMillis)
+    val description = stringResource(
+        R.string.timer_ring_description,
+        stringResource(state.sessionType.labelRes()),
+        time
+    )
 
     // Digits keep the same physical size whatever the system font scale, so they can't
     // outgrow the ring. They are already very large, so readability is not affected.
@@ -179,9 +185,7 @@ private fun TimerRing(state: TimerUiState, color: Color, size: Dp) {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(size)
-            .semantics(mergeDescendants = true) {
-                contentDescription = "${state.sessionType.label}, $time remaining"
-            }
+            .semantics(mergeDescendants = true) { contentDescription = description }
     ) {
         CircularProgressIndicator(
             progress = { state.progress },
@@ -228,7 +232,7 @@ private fun CycleAndControls(
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = "Work sessions completed: ${state.completedWorkSessions}",
+            text = stringResource(R.string.work_sessions_completed, state.completedWorkSessions),
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -239,29 +243,31 @@ private fun CycleAndControls(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val mainLabel = when (state.status) {
-                TimerStatus.RUNNING -> "Pause"
-                TimerStatus.PAUSED -> "Resume"
-                TimerStatus.IDLE -> "Start"
+                TimerStatus.RUNNING -> R.string.action_pause
+                TimerStatus.PAUSED -> R.string.action_resume
+                TimerStatus.IDLE -> R.string.action_start
             }
             Button(
                 onClick = if (state.status == TimerStatus.RUNNING) onPause else onStart,
                 modifier = Modifier.defaultMinSize(minWidth = 140.dp, minHeight = 56.dp)
             ) {
-                Text(mainLabel, style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(mainLabel), style = MaterialTheme.typography.titleMedium)
             }
             OutlinedButton(
                 onClick = onReset,
                 modifier = Modifier.defaultMinSize(minHeight = 56.dp),
                 enabled = state.status != TimerStatus.IDLE ||
                         state.remainingMillis != state.totalMillis
-            ) { Text("Reset") }
+            ) { Text(stringResource(R.string.action_reset)) }
         }
 
         Spacer(Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (state.sessionType != SessionType.WORK) {
-                TextButton(onClick = onSkipBreak) { Text("Skip break") }
+                TextButton(onClick = onSkipBreak) {
+                    Text(stringResource(R.string.action_skip_break))
+                }
             }
             TextButton(
                 onClick = onResetAll,
@@ -269,7 +275,7 @@ private fun CycleAndControls(
                         state.sessionType != SessionType.WORK ||
                         state.status != TimerStatus.IDLE ||
                         state.remainingMillis != state.totalMillis
-            ) { Text("Reset all") }
+            ) { Text(stringResource(R.string.action_reset_all)) }
         }
     }
 }
@@ -278,11 +284,12 @@ private fun CycleAndControls(
 @Composable
 fun CycleDots(filled: Int, total: Int, color: Color) {
     val emptyColor = MaterialTheme.colorScheme.surfaceVariant
+    val description = stringResource(R.string.cycle_dots_description, filled, total)
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.semantics(mergeDescendants = true) {
-            contentDescription = "$filled of $total work sessions done in this cycle"
+            contentDescription = description
         }
     ) {
         repeat(total) { index ->
@@ -353,3 +360,7 @@ private fun TabletPreview() = PreviewHost(previewState)
 private fun DarkBreakPreview() = PreviewHost(
     previewState.copy(sessionType = SessionType.SHORT_BREAK, completedWorkSessions = 2)
 )
+
+@Preview(name = "isiZulu", widthDp = 360, heightDp = 780, showBackground = true, locale = "zu")
+@Composable
+private fun ZuluPreview() = PreviewHost(previewState)

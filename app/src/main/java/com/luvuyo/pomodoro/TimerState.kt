@@ -1,10 +1,6 @@
 package com.luvuyo.pomodoro
 
-enum class SessionType(val label: String) {
-    WORK("Work"),
-    SHORT_BREAK("Short Break"),
-    LONG_BREAK("Long Break")
-}
+enum class SessionType { WORK, SHORT_BREAK, LONG_BREAK }
 
 enum class TimerStatus { IDLE, RUNNING, PAUSED }
 

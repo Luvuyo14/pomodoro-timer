@@ -27,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -63,35 +64,35 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "Settings",
+                text = stringResource(R.string.settings),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.semantics { heading() }
             )
 
             SettingStepper(
-                label = "Work session",
-                valueText = "$work min",
+                label = stringResource(R.string.setting_work_session),
+                valueText = stringResource(R.string.minutes_short, work),
                 value = work,
                 range = PomodoroConfig.WORK_RANGE,
                 onChange = { work = it }
             )
             SettingStepper(
-                label = "Short break",
-                valueText = "$shortBreak min",
+                label = stringResource(R.string.setting_short_break),
+                valueText = stringResource(R.string.minutes_short, shortBreak),
                 value = shortBreak,
                 range = PomodoroConfig.SHORT_BREAK_RANGE,
                 onChange = { shortBreak = it }
             )
             SettingStepper(
-                label = "Long break",
-                valueText = "$longBreak min",
+                label = stringResource(R.string.setting_long_break),
+                valueText = stringResource(R.string.minutes_short, longBreak),
                 value = longBreak,
                 range = PomodoroConfig.LONG_BREAK_RANGE,
                 onChange = { longBreak = it }
             )
             SettingStepper(
-                label = "Work sessions before long break",
-                valueText = "$sessions sessions",
+                label = stringResource(R.string.setting_sessions_before_long_break),
+                valueText = stringResource(R.string.sessions_count, sessions),
                 value = sessions,
                 range = PomodoroConfig.SESSIONS_RANGE,
                 onChange = { sessions = it }
@@ -109,9 +110,12 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Sound on session end", style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        text = if (sound) "On" else "Off",
+                        text = stringResource(R.string.setting_sound),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = stringResource(if (sound) R.string.state_on else R.string.state_off),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -119,12 +123,12 @@ fun SettingsScreen(
                 Switch(checked = sound, onCheckedChange = null)
             }
 
-            OutlinedButton(onClick = onPreviewSound) { Text("Preview sound") }
+            OutlinedButton(onClick = onPreviewSound) {
+                Text(stringResource(R.string.action_preview_sound))
+            }
 
             Text(
-                text = "A session that hasn't started picks up changes right away. " +
-                        "A running or paused session finishes at its current length. " +
-                        "The sound follows your notification volume.",
+                text = stringResource(R.string.settings_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -140,9 +144,11 @@ fun SettingsScreen(
                             soundEnabled = sound
                         )
                     )
-                }) { Text("Save") }
+                }) { Text(stringResource(R.string.action_save)) }
 
-                OutlinedButton(onClick = onCancel) { Text("Cancel") }
+                OutlinedButton(onClick = onCancel) {
+                    Text(stringResource(R.string.action_cancel))
+                }
             }
 
             TextButton(onClick = {
@@ -152,7 +158,7 @@ fun SettingsScreen(
                 longBreak = defaults.longBreakMinutes
                 sessions = defaults.sessionsBeforeLongBreak
                 sound = defaults.soundEnabled
-            }) { Text("Restore defaults") }
+            }) { Text(stringResource(R.string.action_restore_defaults)) }
         }
     }
 }
@@ -166,6 +172,9 @@ private fun SettingStepper(
     range: IntRange,
     onChange: (Int) -> Unit
 ) {
+    val decreaseDescription = stringResource(R.string.decrease_setting, label)
+    val increaseDescription = stringResource(R.string.increase_setting, label)
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -182,7 +191,7 @@ private fun SettingStepper(
         FilledTonalIconButton(
             onClick = { onChange(value - 1) },
             enabled = value > range.first,
-            modifier = Modifier.semantics { contentDescription = "Decrease $label" }
+            modifier = Modifier.semantics { contentDescription = decreaseDescription }
         ) {
             Text("−", fontSize = 24.sp, modifier = Modifier.clearAndSetSemantics { })
         }
@@ -192,7 +201,7 @@ private fun SettingStepper(
         FilledTonalIconButton(
             onClick = { onChange(value + 1) },
             enabled = value < range.last,
-            modifier = Modifier.semantics { contentDescription = "Increase $label" }
+            modifier = Modifier.semantics { contentDescription = increaseDescription }
         ) {
             Text("+", fontSize = 24.sp, modifier = Modifier.clearAndSetSemantics { })
         }

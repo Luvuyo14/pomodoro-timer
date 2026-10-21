@@ -1,3 +1,53 @@
 <resources>
     <string name="app_name">Pomodoro Timer</string>
+
+    <!-- Session types -->
+    <string name="session_work">Work</string>
+    <string name="session_short_break">Short Break</string>
+    <string name="session_long_break">Long Break</string>
+
+    <!-- Timer screen -->
+    <string name="settings">Settings</string>
+    <string name="action_start">Start</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Resume</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_skip_break">Skip break</string>
+    <string name="action_reset_all">Reset all</string>
+    <string name="work_sessions_completed">Work sessions completed: %1$d</string>
+    <string name="timer_ring_description">%1$s, %2$s remaining</string>
+    <string name="cycle_dots_description">%1$d of %2$d work sessions done in this cycle</string>
+    <string name="time_remaining">Time remaining</string>
+    <string name="paused_at">Paused at %1$s</string>
+
+    <!-- Settings screen -->
+    <string name="setting_work_session">Work session</string>
+    <string name="setting_short_break">Short break</string>
+    <string name="setting_long_break">Long break</string>
+    <string name="setting_sessions_before_long_break">Work sessions before long break</string>
+    <string name="setting_sound">Sound on session end</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="sessions_count">%1$d sessions</string>
+    <string name="state_on">On</string>
+    <string name="state_off">Off</string>
+    <string name="action_preview_sound">Preview sound</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_restore_defaults">Restore defaults</string>
+    <string name="decrease_setting">Decrease %1$s</string>
+    <string name="increase_setting">Increase %1$s</string>
+    <string name="settings_hint">A session that hasn\'t started picks up changes right away. A running or paused session finishes at its current length. The sound follows your notification volume.</string>
+
+    <!-- Notifications -->
+    <string name="channel_timer_name">Running timer</string>
+    <string name="channel_timer_description">Shows the countdown while a session is running</string>
+    <string name="channel_end_name">Session finished</string>
+    <string name="channel_end_description">Tells you when a work session or break has finished</string>
+    <string name="notification_work_done">Work session complete</string>
+    <string name="notification_break_done">Break is over</string>
+    <string name="notification_long_break_done">Long break is over</string>
+    <string name="notification_next_short_break">Time for a short break.</string>
+    <string name="notification_next_long_break">Great work! Time for a long break.</string>
+    <string name="notification_next_work">Ready for the next work session?</string>
 </resources>

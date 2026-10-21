@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:drawable="@drawable/splash_icon_vector">
+
+    <!-- 0-300 ms: the faint ring track fades in -->
+    <target android:name="track">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="300"
+                android:propertyName="strokeAlpha"
+                android:valueFrom="0"
+                android:valueTo="0.28"
+                android:valueType="floatType" />
+        </aapt:attr>
+    </target>
+
+    <!-- 0-700 ms: the progress arc draws itself -->
+    <target android:name="progress_arc">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="700"
+                android:interpolator="@android:interpolator/fast_out_slow_in"
+                android:propertyName="trimPathEnd"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:valueType="floatType" />
+        </aapt:attr>
+    </target>
+
+    <!-- 0-700 ms: the clock hand sweeps round with it -->
+    <target android:name="hand_group">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="700"
+                android:interpolator="@android:interpolator/fast_out_slow_in"
+                android:propertyName="rotation"
+                android:valueFrom="0"
+                android:valueTo="270"
+                android:valueType="floatType" />
+        </aapt:attr>
+    </target>
+
+    <!-- 0-300 ms: the centre dot pops in -->
+    <target android:name="dot_group">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/overshoot"
+                    android:propertyName="scaleX"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType" />
+                <objectAnimator
+                    android:duration="300"
+                    android:interpolator="@android:interpolator/overshoot"
+                    android:propertyName="scaleY"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- 540-900 ms: the leaves pop in (held at 0 until 60% of the way, then overshoot to 1) -->
+    <target android:name="leaves">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="900">
+                <propertyValuesHolder android:propertyName="scaleX">
+                    <keyframe
+                        android:fraction="0"
+                        android:value="0" />
+                    <keyframe
+                        android:fraction="0.6"
+                        android:value="0" />
+                    <keyframe
+                        android:fraction="1"
+                        android:interpolator="@android:interpolator/overshoot"
+                        android:value="1" />
+                </propertyValuesHolder>
+                <propertyValuesHolder android:propertyName="scaleY">
+                    <keyframe
+                        android:fraction="0"
+                        android:value="0" />
+                    <keyframe
+                        android:fraction="0.6"
+                        android:value="0" />
+                    <keyframe
+                        android:fraction="1"
+                        android:interpolator="@android:interpolator/overshoot"
+                        android:value="1" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+
+</animated-vector>

@@ -2,4 +2,13 @@
 <resources>
 
     <style name="Theme.PomodoroTimer" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Shown while the app starts. Hands over to Theme.PomodoroTimer afterwards. -->
+    <style name="Theme.PomodoroTimer.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#C62828</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_animated</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.PomodoroTimer</item>
+    </style>
+
 </resources>

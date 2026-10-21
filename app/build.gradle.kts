@@ -53,4 +53,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.lifecycle:lifecycle-process:2.8.7")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

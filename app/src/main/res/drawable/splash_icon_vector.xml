@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+
+    <group
+        android:name="art"
+        android:scaleX="0.46"
+        android:scaleY="0.46"
+        android:translateX="26.24"
+        android:translateY="34.06">
+
+        <!-- Ring track -->
+        <path
+            android:name="track"
+            android:pathData="M256,150 A132,132 0 1 1 256,414 A132,132 0 1 1 256,150"
+            android:strokeAlpha="0.28"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="40" />
+
+        <!-- Progress arc (75%) -->
+        <path
+            android:name="progress_arc"
+            android:pathData="M256,150 A132,132 0 1 1 124,282"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round"
+            android:strokeWidth="40"
+            android:trimPathEnd="1"
+            android:trimPathStart="0" />
+
+        <!-- Clock hand: drawn pointing up, rotated 270 degrees to end pointing left -->
+        <group
+            android:name="hand_group"
+            android:pivotX="256"
+            android:pivotY="282"
+            android:rotation="270">
+            <path
+                android:pathData="M256,282 L256,218"
+                android:strokeColor="#FFFFFF"
+                android:strokeLineCap="round"
+                android:strokeWidth="20" />
+        </group>
+
+        <!-- Centre dot -->
+        <group
+            android:name="dot_group"
+            android:pivotX="256"
+            android:pivotY="282"
+            android:scaleX="1"
+            android:scaleY="1">
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M256,266 A16,16 0 1 1 256,298 A16,16 0 1 1 256,266 Z" />
+        </group>
+
+        <!-- Leaf crown -->
+        <group
+            android:name="leaves"
+            android:pivotX="256"
+            android:pivotY="122"
+            android:scaleX="1"
+            android:scaleY="1">
+            <path
+                android:fillColor="#81C784"
+                android:pathData="M256,116 C222,84 176,92 158,122 C196,138 238,136 256,116 Z" />
+            <path
+                android:fillColor="#81C784"
+                android:pathData="M256,116 C290,84 336,92 354,122 C316,138 274,136 256,116 Z" />
+            <path
+                android:fillColor="#A5D6A7"
+                android:pathData="M256,116 C242,88 246,62 256,44 C266,62 270,88 256,116 Z" />
+        </group>
+    </group>
+</vector>
