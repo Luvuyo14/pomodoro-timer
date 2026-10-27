@@ -50,4 +50,20 @@
     <string name="notification_next_short_break">Time for a short break.</string>
     <string name="notification_next_long_break">Great work! Time for a long break.</string>
     <string name="notification_next_work">Ready for the next work session?</string>
+
+    <!-- Google Calendar -->
+    <string name="calendar_title">Google Calendar</string>
+    <string name="calendar_description">Log each finished work session as an event in a separate Pomodoro Timer calendar. The app can only see and change that calendar.</string>
+    <string name="calendar_status_connected">Connected</string>
+    <string name="calendar_status_not_connected">Not connected</string>
+    <string name="calendar_action_connect">Connect Google Calendar</string>
+    <string name="calendar_action_reconnect">Reconnect</string>
+    <string name="calendar_action_disconnect">Disconnect</string>
+    <string name="calendar_pending">%1$d sessions waiting to sync</string>
+    <string name="calendar_issue_connect_failed">Couldn\'t connect to Google Calendar. Check your internet connection and try again.</string>
+    <string name="calendar_issue_needs_reconnect">Google Calendar needs your permission again.</string>
+    <string name="calendar_issue_sync_pending">Couldn\'t reach Google Calendar. Sessions will sync when you\'re back online.</string>
+    <string name="calendar_disconnect_hint">To fully remove access, remove Pomodoro Timer from the third-party apps in your Google Account settings.</string>
+    <string name="calendar_event_title">Pomodoro focus session</string>
+    <string name="calendar_event_description">Work session %1$d of %2$d · logged by Pomodoro Timer</string>
 </resources>

@@ -1,10 +1,12 @@
 package com.luvuyo.pomodoro
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,6 +24,7 @@ fun PomodoroApp(viewModel: PomodoroViewModel = viewModel()) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsState()
     val config by viewModel.config.collectAsState()
+    val calendarState by viewModel.calendarState.collectAsState()
     var showSettings by rememberSaveable { mutableStateOf(false) }
     var askedForNotifications by rememberSaveable { mutableStateOf(false) }
 
@@ -29,6 +32,15 @@ fun PomodoroApp(viewModel: PomodoroViewModel = viewModel()) {
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
+
+    // Google's "allow this app to use your calendar" screen. Cancelling it is not an error.
+    val calendarConsent = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            viewModel.onCalendarAuthResult(result.data)
+        }
+    }
 
     val onStart = {
         if (Build.VERSION.SDK_INT >= 33 &&
@@ -46,12 +58,19 @@ fun PomodoroApp(viewModel: PomodoroViewModel = viewModel()) {
         BackHandler { showSettings = false }
         SettingsScreen(
             config = config,
+            calendarState = calendarState,
             onSave = { newConfig ->
                 viewModel.saveSettings(newConfig)
                 showSettings = false
             },
             onCancel = { showSettings = false },
-            onPreviewSound = viewModel::previewSound
+            onPreviewSound = viewModel::previewSound,
+            onConnectCalendar = {
+                viewModel.connectCalendar { consent ->
+                    calendarConsent.launch(IntentSenderRequest.Builder(consent).build())
+                }
+            },
+            onDisconnectCalendar = viewModel::disconnectCalendar
         )
     } else {
         PomodoroContent(

@@ -15,6 +15,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -39,9 +40,12 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SettingsScreen(
     config: PomodoroConfig,
+    calendarState: CalendarUiState,
     onSave: (PomodoroConfig) -> Unit,
     onCancel: () -> Unit,
-    onPreviewSound: () -> Unit
+    onPreviewSound: () -> Unit,
+    onConnectCalendar: () -> Unit,
+    onDisconnectCalendar: () -> Unit
 ) {
     // Draft values survive rotation; they reset if the saved config changes underneath.
     var work by rememberSaveable(config) { mutableStateOf(config.workMinutes) }
@@ -133,6 +137,16 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
+            HorizontalDivider()
+
+            CalendarSection(
+                state = calendarState,
+                onConnect = onConnectCalendar,
+                onDisconnect = onDisconnectCalendar
+            )
+
+            HorizontalDivider()
+
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Button(onClick = {
                     onSave(
@@ -159,6 +173,81 @@ fun SettingsScreen(
                 sessions = defaults.sessionsBeforeLongBreak
                 sound = defaults.soundEnabled
             }) { Text(stringResource(R.string.action_restore_defaults)) }
+        }
+    }
+}
+
+/** Connect or disconnect Google Calendar. These actions apply immediately, not on Save. */
+@Composable
+private fun CalendarSection(
+    state: CalendarUiState,
+    onConnect: () -> Unit,
+    onDisconnect: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = stringResource(R.string.calendar_title),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.semantics { heading() }
+        )
+        Text(
+            text = stringResource(R.string.calendar_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = stringResource(
+                if (state.connected) R.string.calendar_status_connected
+                else R.string.calendar_status_not_connected
+            ),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        if (state.pendingCount > 0) {
+            Text(
+                text = stringResource(R.string.calendar_pending, state.pendingCount),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        val issueText = when (state.issue) {
+            CalendarIssue.NONE -> null
+            CalendarIssue.CONNECT_FAILED -> R.string.calendar_issue_connect_failed
+            CalendarIssue.NEEDS_RECONNECT -> R.string.calendar_issue_needs_reconnect
+            CalendarIssue.SYNC_PENDING -> R.string.calendar_issue_sync_pending
+        }
+        if (issueText != null) {
+            Text(
+                text = stringResource(issueText),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (!state.connected) {
+                Button(onClick = onConnect, enabled = !state.busy) {
+                    Text(stringResource(R.string.calendar_action_connect))
+                }
+            } else {
+                if (state.issue == CalendarIssue.NEEDS_RECONNECT) {
+                    Button(onClick = onConnect, enabled = !state.busy) {
+                        Text(stringResource(R.string.calendar_action_reconnect))
+                    }
+                }
+                OutlinedButton(onClick = onDisconnect, enabled = !state.busy) {
+                    Text(stringResource(R.string.calendar_action_disconnect))
+                }
+            }
+        }
+
+        if (state.connected) {
+            Text(
+                text = stringResource(R.string.calendar_disconnect_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

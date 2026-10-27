@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * The timer itself: clock, settings, sound and notifications. It lives for as long as the app
- * process does, so it keeps counting when the screen is closed. The rules for what happens when
- * a session ends are the pure functions in TimerState.kt.
+ * The timer itself: clock, settings, sound, notifications and calendar logging. It lives for as
+ * long as the app process does, so it keeps counting when the screen is closed. The rules for
+ * what happens when a session ends are the pure functions in TimerState.kt.
  */
 class TimerEngine(context: Context) {
 
@@ -27,6 +27,9 @@ class TimerEngine(context: Context) {
 
     private val repository = SettingsRepository(appContext)
     private val soundPlayer = SoundPlayer(appContext)
+
+    /** Logs finished work sessions to Google Calendar when the user has connected it. */
+    val calendar = CalendarSync(appContext, scope)
 
     private val _config = MutableStateFlow(PomodoroConfig())
     /** The current saved configuration, used by the settings screen. */
@@ -37,6 +40,9 @@ class TimerEngine(context: Context) {
 
     private var tickJob: Job? = null
 
+    /** Wall-clock time the current session began, for the calendar event. Kept across pauses. */
+    private var sessionStartedAtMillis: Long? = null
+
     init {
         // Keep the timer in sync with whatever is saved in DataStore.
         scope.launch {
@@ -45,6 +51,8 @@ class TimerEngine(context: Context) {
                 _uiState.update { it.withConfigApplied(saved) }
             }
         }
+        // Send any sessions that couldn't be logged last time (for example when offline).
+        calendar.flushPending()
     }
 
     /** Starts a fresh session or resumes a paused one. */
@@ -52,6 +60,11 @@ class TimerEngine(context: Context) {
         if (_uiState.value.status == TimerStatus.RUNNING) return
 
         NotificationHelper.cancelSessionFinished(appContext)
+
+        // A fresh start (not a resume) marks when the session really began.
+        if (_uiState.value.status == TimerStatus.IDLE) {
+            sessionStartedAtMillis = System.currentTimeMillis()
+        }
 
         // Use elapsedRealtime so the countdown doesn't drift with delay().
         val endAt = SystemClock.elapsedRealtime() + _uiState.value.remainingMillis
@@ -83,6 +96,7 @@ class TimerEngine(context: Context) {
     /** Resets the current session back to its full length. */
     fun reset() {
         tickJob?.cancel()
+        sessionStartedAtMillis = null
         _uiState.update {
             it.copy(status = TimerStatus.IDLE, remainingMillis = it.totalMillis)
         }
@@ -92,12 +106,14 @@ class TimerEngine(context: Context) {
     fun skipBreak() {
         if (_uiState.value.sessionType == SessionType.WORK) return
         tickJob?.cancel()
+        sessionStartedAtMillis = null
         _uiState.update { it.afterSkippingBreak(_config.value) }
     }
 
     /** Starts over: back to a fresh Work session with the counter at zero. */
     fun resetAll() {
         tickJob?.cancel()
+        sessionStartedAtMillis = null
         _uiState.update { it.afterResetAll(_config.value) }
     }
 
@@ -111,19 +127,34 @@ class TimerEngine(context: Context) {
         soundPlayer.playSessionEnd()
     }
 
-    /** Called when the countdown reaches zero: move to the next session, play the sound, notify. */
+    /** Called when the countdown reaches zero: move on, log it, play the sound, notify. */
     private fun completeSession() {
         val config = _config.value
-        val finished = _uiState.value.sessionType
+        val before = _uiState.value
+        val finished = before.sessionType
 
         _uiState.update { it.afterSessionEnds(config) }
-        val next = _uiState.value.sessionType
+        val after = _uiState.value
+        val endedAt = System.currentTimeMillis()
+
+        if (finished == SessionType.WORK) {
+            val cycle = config.sessionsBeforeLongBreak.coerceAtLeast(1)
+            calendar.logWorkSession(
+                PendingSession(
+                    startMillis = sessionStartedAtMillis ?: (endedAt - before.totalMillis),
+                    endMillis = endedAt,
+                    sessionNumber = (after.completedWorkSessions - 1) % cycle + 1,
+                    sessionsInCycle = cycle
+                )
+            )
+        }
+        sessionStartedAtMillis = null
 
         if (config.soundEnabled) soundPlayer.playSessionEnd()
 
         // Only needed when the user can't see the app; otherwise the screen already shows it.
         if (!isAppVisible()) {
-            NotificationHelper.notifySessionFinished(appContext, finished, next)
+            NotificationHelper.notifySessionFinished(appContext, finished, after.sessionType)
         }
     }
 

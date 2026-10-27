@@ -50,4 +50,20 @@
     <string name="notification_next_short_break">Isikhathi sekhefu elifushane.</string>
     <string name="notification_next_long_break">Umsebenzi omuhle! Isikhathi sekhefu elide.</string>
     <string name="notification_next_work">Ukulungele isikhathi esilandelayo sokusebenza?</string>
+
+    <!-- Google Calendar -->
+    <string name="calendar_title">Ikhalenda likaGoogle</string>
+    <string name="calendar_description">Rekhoda isikhathi ngasinye sokusebenza esiqediwe njengomcimbi ekhalendeni elihlukile le-Pomodoro Timer. I-app ingabona futhi ishintshe leli khalenda kuphela.</string>
+    <string name="calendar_status_connected">Kuxhunyiwe</string>
+    <string name="calendar_status_not_connected">Akuxhunyiwe</string>
+    <string name="calendar_action_connect">Xhuma ikhalenda likaGoogle</string>
+    <string name="calendar_action_reconnect">Xhuma futhi</string>
+    <string name="calendar_action_disconnect">Nqamula</string>
+    <string name="calendar_pending">%1$d izikhathi zilindele ukuvumelanisa</string>
+    <string name="calendar_issue_connect_failed">Ayikwazanga ukuxhuma kukhalenda likaGoogle. Hlola i-inthanethi yakho uzame futhi.</string>
+    <string name="calendar_issue_needs_reconnect">Ikhalenda likaGoogle lidinga imvume yakho futhi.</string>
+    <string name="calendar_issue_sync_pending">Ayikwazanga ukufinyelela ikhalenda likaGoogle. Izikhathi ziyavumelaniswa uma ubuyela ku-inthanethi.</string>
+    <string name="calendar_disconnect_hint">Ukususa ukufinyelela ngokuphelele, susa i-Pomodoro Timer kuma-app abantu besithathu ezilungiselelweni ze-akhawunti yakho yeGoogle.</string>
+    <string name="calendar_event_title">Isikhathi sokugxila (Pomodoro)</string>
+    <string name="calendar_event_description">Isikhathi sokusebenza: %1$d/%2$d · kulotshwe yi-Pomodoro Timer</string>
 </resources>
